@@ -35,6 +35,10 @@ const addPlayer = () => {
     editable: false,
     createdAt: new Date().getTime()
   })
+
+  // Clear variables
+  input_name.value = null
+  input_gender.value = null
 }
 
 const startDrag = (evt, player, groupIndex, playerIndex) => {
@@ -154,8 +158,15 @@ onMounted(() => {
     </section>
 
     <section class="player-list">
-      <h2 class="title">Players</h2>
+      <h2 class="title">Players  ({{ players_asc.length }})</h2>
       <div class="list" id="player-list">
+
+        <div v-if="players_asc.length < 1">
+          <div class="player-item">
+            <div class="player-name">No players yet</div>
+          </div>
+          
+        </div>
 
         <div v-for="player in players_asc" :key="player.createdAt" :class="`player-item ${player.done && 'done'}`">
 
@@ -164,7 +175,7 @@ onMounted(() => {
           </div>
 
           <div class="actions">
-            <button class="delete" @click="removePlayer(player)">Delete</button>
+            <button class="delete" @click="removePlayer(player)"><i class="fi fi-rs-trash"></i></button>
           </div>
         </div>
 
@@ -182,6 +193,8 @@ onMounted(() => {
 
     <section class="greeting" v-if="groupings.length > 0">
       <h2 class="title">Groupings</h2>
+      <p class="instructions" v-if="groupings.length > 0">Touch and hold a name to drag it to another location to swap players</p>
+
 
       <div v-for="(grouping, i) in groupings" :key="i">
 
@@ -204,7 +217,11 @@ onMounted(() => {
                 @dragover.prevent
                 @dragenter.prevent
                 >
-                {{ grouping[0].name }}
+                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                <div class="grouping-name">
+                  {{ grouping[0].name }}
+                </div>
+                
               </div>
 
               <div 
@@ -217,9 +234,12 @@ onMounted(() => {
                 @dragover.prevent
                 @dragenter.prevent
                 >
-                {{ grouping[1].name }}</div>
-
-                <div v-else>&nbsp;</div>
+                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                <div class="grouping-name">
+                  {{ grouping[1].name }}
+                </div>
+                
+              </div>
 
             </div>
             
@@ -236,8 +256,13 @@ onMounted(() => {
                 @dragover.prevent
                 @dragenter.prevent
                 >
-                {{ grouping[2].name }}</div>
-                <div v-else class="empty">&nbsp;</div>
+                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                <div class="grouping-name">
+                  {{ grouping[2].name }}
+                </div>
+                
+              </div>
+
               <div 
                 v-if="grouping[3]" 
                 class="player" 
@@ -248,9 +273,11 @@ onMounted(() => {
                 @dragover.prevent
                 @dragenter.prevent
                 >
-                {{ grouping[3].name }}</div>
-
-                <div v-else class="empty">&nbsp;</div>
+                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                <div class="grouping-name">
+                  {{ grouping[3].name }}
+                </div>
+              </div>
 
             </div>
           </div>
@@ -262,7 +289,6 @@ onMounted(() => {
       <button v-if="groupings.length > 0" class="delete-groupings-button" @click="deleteGroupings">Delete
         groupings</button>
     </section>
-
 
   </main>
 </template>

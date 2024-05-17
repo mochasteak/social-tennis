@@ -73,7 +73,7 @@ h4 {
 .grouping, .grouping .player {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: start;
 	background-color: #FFF;
 	padding: 1rem;
 	border-radius: 0.5rem;
@@ -97,7 +97,7 @@ h4 {
 .subtitle {
 	color: var(--dark);
 	font-size: 1.2rem;
-	font-weight: 500;
+	font-weight: 700;
 	margin-top: 1rem;
 }
 
@@ -248,12 +248,19 @@ input:checked ~ .bubble::after {
 	padding: 1rem;
 	border-radius: 0.5rem;
 	box-shadow: var(--shadow);
-	margin-bottom: 1rem;
+
 }
 
-.player-list {
+.list {
+	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
+	gap: 10px 10px;
+}
+
+.player-item {
+	min-width: 150px;
+
 }
 
 .player-item label {
@@ -295,7 +302,7 @@ input:checked ~ .bubble::after {
 }
 
 .player-item .actions .delete {
-	background-color: var(--danger);
+	color: var(--danger);
 }
 
 .player-item.done .player-name input {
@@ -303,7 +310,28 @@ input:checked ~ .bubble::after {
 	color: var(--grey);
 }
 
+.player {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+}
+
 .vs {
 	margin: 0 0.5rem;
 	font-weight: 700;
+}
+
+.icon {
+	color: var(--grey);
+}
+
+.instructions {
+	font-size: 1rem;
+	margin-top: 1rem;
+}
+
+.grouping-name {
+	flex-grow: 1;
+	justify-content: center;
 }
