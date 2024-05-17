@@ -105,6 +105,10 @@ h4 {
 	display: flex;
 }
 
+.title {
+	margin-bottom: 1rem;
+}
+
 .greeting .title input {
 	margin-left: 0.5rem;
 	flex: 1 1 0%;
@@ -259,7 +263,7 @@ input:checked ~ .bubble::after {
 }
 
 .player-item {
-	min-width: 150px;
+	min-width: 0px;
 
 }
 
@@ -281,6 +285,7 @@ input:checked ~ .bubble::after {
 .player-item .actions {
 	display: flex;
 	align-items: center;
+	margin-left: 1rem;
 }
 
 .player-item .actions button {

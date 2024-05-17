@@ -10,6 +10,7 @@ const inboundGroupIndex = ref(null)
 const inboundPlayerIndex = ref(null)
 const inboundPlayer = ref(null)
 const outboundPlayer = ref(null)
+const anchor = ref(null)
 
 // eslint-disable-next-line vue/no-side-effects-in-computed-properties
 const players_asc = computed(() => players.value.sort((a, b) => {
@@ -113,6 +114,9 @@ const makeGroupings = () => {
     groupings.value.push(tempPlayers.slice(i, i + 4));
   }
 
+  // Scroll to the top of the 'groupings' list
+  anchor.value.scrollIntoView({ behavior: 'smooth' })
+
 }
 
 onMounted(() => {
@@ -133,10 +137,10 @@ onMounted(() => {
       <h2 class="title">Add Player</h2>
 
       <form id="new-player-form" @submit.prevent="addPlayer">
-        <h4>What's their name?</h4>
+        <h4>Name</h4>
         <input type="text" name="name" id="name" placeholder="e.g. John S." v-model="input_name" />
 
-        <h4>Gender?</h4>
+        <h4>Gender</h4>
         <div class="options">
 
           <label>
@@ -191,8 +195,8 @@ onMounted(() => {
       <button class="make-groupings-button" @click="makeGroupings">Make groupings</button>
     </section>
 
-    <section class="greeting" v-if="groupings.length > 0">
-      <h2 class="title">Groupings</h2>
+    <section class="greeting" ref="anchor">
+      <h2 class="title" v-if="groupings.length > 0">Groupings</h2>
       <p class="instructions" v-if="groupings.length > 0">Touch and hold a name to drag it to another location to swap players</p>
 
 
@@ -289,6 +293,7 @@ onMounted(() => {
       <button v-if="groupings.length > 0" class="delete-groupings-button" @click="deleteGroupings">Delete
         groupings</button>
     </section>
+    <div ref="anchor"></div>
 
   </main>
 </template>
