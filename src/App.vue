@@ -2,42 +2,84 @@
 import { ref, onMounted, computed, watch } from 'vue'
 
 const players = ref([])
-const input_content = ref('')
-const input_category = ref(null)
+const input_name = ref('')
+const input_gender = ref(null)
 const groupings = ref([])
+let round = ref(0)
+const inboundGroupIndex = ref(null)
+const inboundPlayerIndex = ref(null)
+const inboundPlayer = ref(null)
+const outboundPlayer = ref(null)
 
 // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-const players_asc = computed(() => players.value.sort((a,b) =>{
-	return a.createdAt - b.createdAt
+const players_asc = computed(() => players.value.sort((a, b) => {
+  return a.createdAt - b.createdAt
 }))
 
 
 watch(players, (newVal) => {
-	localStorage.setItem('players', JSON.stringify(newVal))
+  localStorage.setItem('players', JSON.stringify(newVal))
 }, {
-	deep: true
+  deep: true
 })
 
-const addTodo = () => {
-	if (input_content.value.trim() === '' || input_category.value === null) {
-		return
-	}
+const addPlayer = () => {
+  if (input_name.value.trim() === '' || input_gender.value === null) {
+    return
+  }
 
-	players.value.push({
-		content: input_content.value,
-		category: input_category.value,
-		done: false,
-		editable: false,
-		createdAt: new Date().getTime()
-	})
+  players.value.push({
+    name: input_name.value,
+    gender: input_gender.value,
+    done: false,
+    editable: false,
+    createdAt: new Date().getTime()
+  })
 }
 
-const removeTodo = (todo) => {
-	players.value = players.value.filter((t) => t !== todo)
+const startDrag = (evt, player, groupIndex, playerIndex) => {
+  console.log('startDrag')
+  console.log('player = ' + JSON.stringify(player));
+  console.log('groupIndex = ' + groupIndex + 'playerIndex = ' + playerIndex);
+  evt.dataTransfer.dropEffect = 'move'
+  evt.dataTransfer.effectAllowed = 'move'
+  evt.dataTransfer.setData('player', player)
+  inboundGroupIndex.value = groupIndex
+  inboundPlayerIndex.value = playerIndex
+  inboundPlayer.value = player
+}
+
+const onDrop = (evt, groupIndex, playerIndex) => {
+  console.log('onDrop >> groupIndex = ' + groupIndex)
+
+  // Get the player data and add to new grouing
+  const movedPlayer = evt.dataTransfer.getData('player')
+  console.log('movedPlayer = ' + JSON.stringify(movedPlayer));
+
+  // Store the outbound player details
+  outboundPlayer.value = groupings.value[groupIndex][playerIndex]
+
+  // Add the new player to group, replacing the existing player
+  groupings.value[groupIndex].splice(playerIndex, 1, JSON.parse(movedPlayer))
+
+  // Remove the moved player from their original list and add the swapped player
+  groupings.value[inboundGroupIndex.value].splice(inboundPlayerIndex.value, 1, outboundPlayer.value)
+
+  //Reset the variables
+  inboundGroupIndex.value = null
+  inboundPlayerIndex.value = null
+  inboundPlayer.value = null
+  outboundPlayer.value = null
+
+}
+
+const removePlayer = (player) => {
+  players.value = players.value.filter((t) => t !== player)
 }
 
 const deleteGroupings = () => {
   groupings.value = []
+  round.value = 0
 }
 
 const makeGroupings = () => {
@@ -45,6 +87,10 @@ const makeGroupings = () => {
   const playersRemainder = players.value.length % 4
   console.log('totalFoursomes = ' + totalFoursomes)
   console.log(`playersRemainder = ${playersRemainder}`)
+
+  // Increment the round
+  round.value += 1
+  console.log('now in round: ' + round.value);
 
   // Make a copy of players
   const tempPlayers = players.value
@@ -55,7 +101,10 @@ const makeGroupings = () => {
     [tempPlayers[i], tempPlayers[j]] = [tempPlayers[j], tempPlayers[i]];
   }
 
-  // Divide into groups of 4
+  // Add a separator
+  groupings.value.push([{ round: round.value }])
+
+  // Divide into groups of 4 and add to 'groupings'
   for (let i = 0; i < tempPlayers.length; i += 4) {
     groupings.value.push(tempPlayers.slice(i, i + 4));
   }
@@ -63,79 +112,64 @@ const makeGroupings = () => {
 }
 
 onMounted(() => {
-	players.value = JSON.parse(localStorage.getItem('players')) || []
+  players.value = JSON.parse(localStorage.getItem('players')) || []
 })
 </script>
 
 <template>
-	<main class="app">
-		
-		<section class="greeting">
-			<h1 class="headline">
-				Social Tennis Generator
-			</h1>
-		</section>
+  <main class="app">
 
-		<section class="create-todo">
-			<h2 class="title">Add Player</h2>
+    <section class="greeting">
+      <h1 class="headline">
+        Social Tennis Generator
+      </h1>
+    </section>
 
-			<form id="new-todo-form" @submit.prevent="addTodo">
-				<h4>What's their name?</h4>
-				<input 
-					type="text" 
-					name="content" 
-					id="content" 
-					placeholder="e.g. John S."
-					v-model="input_content" />
-				
-				<h4>Gender?</h4>
-				<div class="options">
+    <section class="create-player">
+      <h2 class="title">Add Player</h2>
 
-					<label>
-						<input 
-							type="radio" 
-							name="gender" 
-							id="category1" 
-							value="male"
-							v-model="input_category" />
-						<span class="bubble male"></span>
-						<div>Male</div>
-					</label>
+      <form id="new-player-form" @submit.prevent="addPlayer">
+        <h4>What's their name?</h4>
+        <input type="text" name="name" id="name" placeholder="e.g. John S." v-model="input_name" />
 
-					<label>
-						<input 
-							type="radio" 
-							name="gender" 
-							id="category2" 
-							value="female"
-							v-model="input_category" />
-						<span class="bubble female"></span>
-						<div>Female</div>
-					</label>
+        <h4>Gender?</h4>
+        <div class="options">
 
-				</div>
+          <label>
+            <input type="radio" name="gender" id="gender1" value="male" v-model="input_gender" />
+            <span class="bubble male"></span>
+            <div>Male</div>
+          </label>
 
-				<input type="submit" value="Add player" />
-			</form>
-		</section>
+          <label>
+            <input type="radio" name="gender" id="gender2" value="female" v-model="input_gender" />
+            <span class="bubble female"></span>
+            <div>Female</div>
+          </label>
 
-		<section class="todo-list">
-			<h2 class="title">Players</h2>
-			<div class="list" id="todo-list">
+        </div>
 
-				<div v-for="todo in players_asc" :key="todo.content" :class="`todo-item ${todo.done && 'done'}`">
+        <input type="submit" value="Add player" />
+      </form>
+    </section>
 
-					<div class="todo-content" :class="todo.category">
-						{{todo.content}}
-					</div>
+    <section class="player-list">
+      <h2 class="title">Players</h2>
+      <div class="list" id="player-list">
 
-					<div class="actions">
-						<button class="delete" @click="removeTodo(todo)">Delete</button>
-					</div>
-				</div>
+        <div v-for="player in players_asc" :key="player.createdAt" :class="`player-item ${player.done && 'done'}`">
 
-			</div>
-		</section>
+          <div class="player-name" :class="player.gender">
+            {{ player.name }}
+          </div>
+
+          <div class="actions">
+            <button class="delete" @click="removePlayer(player)">Delete</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
 
     <section class="greeting">
       <div>
@@ -146,36 +180,89 @@ onMounted(() => {
       <button class="make-groupings-button" @click="makeGroupings">Make groupings</button>
     </section>
 
-    <section class="greeting"  v-if="groupings.length > 0">
+    <section class="greeting" v-if="groupings.length > 0">
       <h2 class="title">Groupings</h2>
+
       <div v-for="(grouping, i) in groupings" :key="i">
-        <div class="grouping">
-          <div class="player-pair">
-            <div v-if="grouping[0]" class="player" :class="grouping[0].category == 'male' ? 'male' : 'female'">{{grouping[0].content}}</div>
-           <div v-if="grouping[1]" class="player" :class="grouping[1].category == 'male' ? 'male' : 'female'">{{grouping[1].content}}</div>
-          </div>
 
-        <div v-if="grouping.length == 4" class="vs">VS</div>
-
-        <div>
-          <div v-if="grouping[2]" class="player" :class="grouping[2].category == 'male' ? 'male' : 'female'">{{grouping[2].content}}</div>
-        <div v-if="grouping[3]" class="player" :class="grouping[3].category == 'male' ? 'male' : 'female'">{{grouping[3].content}}</div>
+        <div v-if="grouping[0].round">
+          <h3 class="subtitle">Round {{ grouping[0].round }}</h3>
         </div>
 
-        <!-- <div v-for="(player, i) in grouping" :key="i">
-          <div class="player" :class="player.category == 'male' ? 'male' : 'female' ">{{ player.content }}</div>
-        </div> -->
-      </div>
+        <div v-else>
+
+          <div class="grouping">
+
+            <div class="player-pair">
+              <div 
+                v-if="grouping[0]" 
+                class="player" 
+                :class="grouping[0].gender == 'male' ? 'male' : 'female'"
+                draggable="true"
+                @dragstart="startDrag($event, JSON.stringify(grouping[0]), i, 0 )"
+                @drop="onDrop($event, i, 0)"
+                @dragover.prevent
+                @dragenter.prevent
+                >
+                {{ grouping[0].name }}
+              </div>
+
+              <div 
+                v-if="grouping[1]" 
+                class="player" 
+                :class="grouping[1].gender == 'male' ? 'male' : 'female'"
+                draggable="true"
+                @dragstart="startDrag($event, JSON.stringify(grouping[1]), i, 1)"
+                @drop="onDrop($event, i, 1)"
+                @dragover.prevent
+                @dragenter.prevent
+                >
+                {{ grouping[1].name }}</div>
+
+                <div v-else>&nbsp;</div>
+
+            </div>
+            
+            <div v-if="grouping.length == 4" class="vs">VS</div>
+
+            <div class="player-pair">
+              <div 
+                v-if="grouping[2]" 
+                class="player" 
+                :class="grouping[2].gender == 'male' ? 'male' : 'female'"
+                draggable="true"
+                @dragstart="startDrag($event, JSON.stringify(grouping[2]), i, 2)"
+                @drop="onDrop($event, i, 2)"
+                @dragover.prevent
+                @dragenter.prevent
+                >
+                {{ grouping[2].name }}</div>
+                <div v-else class="empty">&nbsp;</div>
+              <div 
+                v-if="grouping[3]" 
+                class="player" 
+                :class="grouping[3].gender == 'male' ? 'male' : 'female'"
+                draggable="true"
+                @dragstart="startDrag($event, JSON.stringify(grouping[3]), i, 3)"
+                @drop="onDrop($event, i, 3)"
+                @dragover.prevent
+                @dragenter.prevent
+                >
+                {{ grouping[3].name }}</div>
+
+                <div v-else class="empty">&nbsp;</div>
+
+            </div>
+          </div>
+        </div>
+
+
       </div>
 
-      <button v-if="groupings.length > 0" class="delete-groupings-button" @click="deleteGroupings">Delete groupings</button>
+      <button v-if="groupings.length > 0" class="delete-groupings-button" @click="deleteGroupings">Delete
+        groupings</button>
     </section>
 
 
-    <p>players = {{ players }}</p>
-    <br>
-    <p>groupings = {{ groupings }}</p>
-    
-
-	</main>
+  </main>
 </template>

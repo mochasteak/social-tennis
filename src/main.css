@@ -81,9 +81,24 @@ h4 {
 	text-align: center;
 }
 
-.grouping .player {
-	margin-right: 1rem;
-	margin-bottom: 0.75rem;
+.player {
+	margin: 0.5rem;
+}
+
+.player-pair {
+	width: 100%;
+}
+
+.empty {
+	height: 100%;
+	padding: 16px;
+}
+
+.subtitle {
+	color: var(--dark);
+	font-size: 1.2rem;
+	font-weight: 500;
+	margin-top: 1rem;
 }
 
 .greeting .title {
@@ -109,7 +124,7 @@ h4 {
 	color: var(--dark)
 }
 
-.create-todo input[type="text"] {
+.create-player input[type="text"] {
 	display: block;
 	width: 100%;
 	font-size: 1.125rem;
@@ -121,14 +136,14 @@ h4 {
 	margin-bottom: 1.5rem;
 }
 
-.create-todo .options {
+.create-player .options {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	grid-gap: 1rem;
 	margin-bottom: 1.5rem;
 }
 
-.create-todo .options label {
+.create-player .options label {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -184,13 +199,13 @@ input:checked ~ .bubble::after {
 	opacity: 1;
 }
 
-.create-todo .options label div {
+.create-player .options label div {
 	color: var(--dark);
 	font-size: 1.125rem;
 	margin-top: 1rem;
 }
 
-.create-todo input[type="submit"], .make-groupings-button {
+.create-player input[type="submit"], .make-groupings-button {
 	display: block;
 	width: 100%;
 	font-size: 1.125rem;
@@ -214,18 +229,19 @@ input:checked ~ .bubble::after {
 	box-shadow: var(--danger-glow);
 	cursor: pointer;
 	transition: 0.2s ease-in-out;
+	margin-top: 5rem;
 
 }
 
-.create-todo input[type="submit"]:hover {
+.create-player input[type="submit"]:hover {
 	opacity: 0.75;
 }
 
-.todo-list .list {
+.player-list .list {
 	margin: 1rem 0;
 } 
 
-.todo-list .todo-item {
+.player-list .player-item {
 	display: flex;
 	align-items: center;
 	background-color: #FFF;
@@ -235,32 +251,32 @@ input:checked ~ .bubble::after {
 	margin-bottom: 1rem;
 }
 
-.todo-list {
+.player-list {
 	flex-direction: row;
 	flex-wrap: wrap;
 }
 
-.todo-item label {
+.player-item label {
 	display: block;
 	margin-right: 1rem;
 	cursor: pointer;
 }
 
-.todo-item .todo-content {
+.player-item .player-name {
 	flex: 1 1 0%;
 }
 
-.todo-item .todo-content input {
+.player-item .player-name input {
 	color: var(--dark);
 	font-size: 1.125rem;
 }
 
-.todo-item .actions {
+.player-item .actions {
 	display: flex;
 	align-items: center;
 }
 
-.todo-item .actions button {
+.player-item .actions button {
 	display: block;
 	padding: 0.5rem;
 	border-radius: 0.25rem;
@@ -269,20 +285,20 @@ input:checked ~ .bubble::after {
 	transition: 0.2s ease-in-out;
 }
 
-.todo-item .actions button:hover {
+.player-item .actions button:hover {
 	opacity: 0.75;
 }
 
-.todo-item .actions .edit {
+.player-item .actions .edit {
 	margin-right: 0.5rem;
 	background-color: var(--primary);
 }
 
-.todo-item .actions .delete {
+.player-item .actions .delete {
 	background-color: var(--danger);
 }
 
-.todo-item.done .todo-content input {
+.player-item.done .player-name input {
 	text-decoration: line-through;
 	color: var(--grey);
 }
