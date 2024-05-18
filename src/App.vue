@@ -1,5 +1,8 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
+import {useToast} from 'vue-toastification'
+
+const toast = useToast()
 
 const players = ref([])
 const input_name = ref('')
@@ -25,10 +28,17 @@ watch(players, (newVal) => {
 })
 
 const addPlayer = () => {
+
+  console.log('addPlayer invoked');
+
+  // Validate and handle errors
   if (input_name.value.trim() === '' || input_gender.value === null) {
+    toast.error('Name and gender are both required')
+    console.log('addPlayer >> display error toast');
     return
   }
 
+  // Create player object and add to players list
   players.value.push({
     name: input_name.value,
     gender: input_gender.value,
@@ -36,6 +46,9 @@ const addPlayer = () => {
     editable: false,
     createdAt: new Date().getTime()
   })
+
+  // Success toast
+  toast.success(`${input_name.value} added to players list`)
 
   // Clear variables
   input_name.value = null
@@ -80,6 +93,7 @@ const onDrop = (evt, groupIndex, playerIndex) => {
 
 const removePlayer = (player) => {
   players.value = players.value.filter((t) => t !== player)
+  toast.success(`${player.name} removed`)
 }
 
 const deleteGroupings = () => {
@@ -116,6 +130,9 @@ const makeGroupings = () => {
 
   // Scroll to the top of the 'groupings' list
   anchor.value.scrollIntoView({ behavior: 'smooth' })
+
+  // Notify user
+  toast.success(`Groupings for Round ${round.value} created. (scroll down)`)
 
 }
 
