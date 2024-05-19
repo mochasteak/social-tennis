@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import {useToast} from 'vue-toastification'
+import { useToast } from 'vue-toastification'
+import { VueToggles } from 'vue-toggles'
 
 const toast = useToast()
 
 const players = ref([])
 const input_name = ref('')
-const input_gender = ref(null)
+const isMale = ref(true)
 const groupings = ref([])
 let round = ref(0)
 const inboundGroupIndex = ref(null)
@@ -32,16 +33,17 @@ const addPlayer = () => {
   console.log('addPlayer invoked');
 
   // Validate and handle errors
-  if (input_name.value.trim() === '' || input_gender.value === null) {
+  if (input_name.value.trim() === '' || isMale.value === null) {
     toast.error('Name and gender are both required')
     console.log('addPlayer >> display error toast');
     return
   }
 
+
   // Create player object and add to players list
   players.value.push({
     name: input_name.value,
-    gender: input_gender.value,
+    gender: isMale.value ? 'male' : 'female',
     done: false,
     editable: false,
     createdAt: new Date().getTime()
@@ -52,7 +54,7 @@ const addPlayer = () => {
 
   // Clear variables
   input_name.value = null
-  input_gender.value = null
+  isMale.value = 'male'
 }
 
 const startDrag = (evt, player, groupIndex, playerIndex) => {
@@ -154,23 +156,25 @@ onMounted(() => {
       <h2 class="title">Add Player</h2>
 
       <form id="new-player-form" @submit.prevent="addPlayer">
-        <h4>Name</h4>
-        <input type="text" name="name" id="name" placeholder="e.g. John S." v-model="input_name" />
+        
 
-        <h4>Gender</h4>
-        <div class="options">
+        <div class="form-inputs">
+          <div>
+            <input type="text" name="name" id="name" placeholder="Type name here" v-model="input_name" />
 
-          <label>
-            <input type="radio" name="gender" id="gender1" value="male" v-model="input_gender" />
-            <span class="bubble male"></span>
-            <div>Male</div>
-          </label>
-
-          <label>
-            <input type="radio" name="gender" id="gender2" value="female" v-model="input_gender" />
-            <span class="bubble female"></span>
-            <div>Female</div>
-          </label>
+          </div>
+          <div>
+            <VueToggles 
+              v-model="isMale" 
+              :height="50" 
+              :width="120" 
+              checkedText="Male" 
+              uncheckedText="Female"
+              checkedBg="#3A82EE" 
+              uncheckedBg="#EA40A4" 
+              fontSize="16"
+            />
+          </div>
 
         </div>
 
@@ -179,14 +183,14 @@ onMounted(() => {
     </section>
 
     <section class="player-list">
-      <h2 class="title">Players  ({{ players_asc.length }})</h2>
+      <h2 class="title">Players ({{ players_asc.length }})</h2>
       <div class="list" id="player-list">
 
         <div v-if="players_asc.length < 1">
           <div class="player-item">
             <div class="player-name">No players yet</div>
           </div>
-          
+
         </div>
 
         <div v-for="player in players_asc" :key="player.createdAt" :class="`player-item ${player.done && 'done'}`">
@@ -214,7 +218,8 @@ onMounted(() => {
 
     <section class="greeting" ref="anchor">
       <h2 class="title" v-if="groupings.length > 0">Groupings</h2>
-      <p class="instructions" v-if="groupings.length > 0">Touch and hold a name to drag it to another location to swap players</p>
+      <p class="instructions" v-if="groupings.length > 0">Touch and hold a name to drag it to another location to swap
+        players</p>
 
 
       <div v-for="(grouping, i) in groupings" :key="i">
@@ -228,72 +233,44 @@ onMounted(() => {
           <div class="grouping">
 
             <div class="player-pair">
-              <div 
-                v-if="grouping[0]" 
-                class="player" 
-                :class="grouping[0].gender == 'male' ? 'male' : 'female'"
-                draggable="true"
-                @dragstart="startDrag($event, JSON.stringify(grouping[0]), i, 0 )"
-                @drop="onDrop($event, i, 0)"
-                @dragover.prevent
-                @dragenter.prevent
-                >
+              <div v-if="grouping[0]" class="player" :class="grouping[0].gender == 'male' ? 'male' : 'female'"
+                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[0]), i, 0)"
+                @drop="onDrop($event, i, 0)" @dragover.prevent @dragenter.prevent>
                 <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
                 <div class="grouping-name">
                   {{ grouping[0].name }}
                 </div>
-                
+
               </div>
 
-              <div 
-                v-if="grouping[1]" 
-                class="player" 
-                :class="grouping[1].gender == 'male' ? 'male' : 'female'"
-                draggable="true"
-                @dragstart="startDrag($event, JSON.stringify(grouping[1]), i, 1)"
-                @drop="onDrop($event, i, 1)"
-                @dragover.prevent
-                @dragenter.prevent
-                >
+              <div v-if="grouping[1]" class="player" :class="grouping[1].gender == 'male' ? 'male' : 'female'"
+                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[1]), i, 1)"
+                @drop="onDrop($event, i, 1)" @dragover.prevent @dragenter.prevent>
                 <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
                 <div class="grouping-name">
                   {{ grouping[1].name }}
                 </div>
-                
+
               </div>
 
             </div>
-            
+
             <div v-if="grouping.length == 4" class="vs">VS</div>
 
             <div class="player-pair">
-              <div 
-                v-if="grouping[2]" 
-                class="player" 
-                :class="grouping[2].gender == 'male' ? 'male' : 'female'"
-                draggable="true"
-                @dragstart="startDrag($event, JSON.stringify(grouping[2]), i, 2)"
-                @drop="onDrop($event, i, 2)"
-                @dragover.prevent
-                @dragenter.prevent
-                >
+              <div v-if="grouping[2]" class="player" :class="grouping[2].gender == 'male' ? 'male' : 'female'"
+                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[2]), i, 2)"
+                @drop="onDrop($event, i, 2)" @dragover.prevent @dragenter.prevent>
                 <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
                 <div class="grouping-name">
                   {{ grouping[2].name }}
                 </div>
-                
+
               </div>
 
-              <div 
-                v-if="grouping[3]" 
-                class="player" 
-                :class="grouping[3].gender == 'male' ? 'male' : 'female'"
-                draggable="true"
-                @dragstart="startDrag($event, JSON.stringify(grouping[3]), i, 3)"
-                @drop="onDrop($event, i, 3)"
-                @dragover.prevent
-                @dragenter.prevent
-                >
+              <div v-if="grouping[3]" class="player" :class="grouping[3].gender == 'male' ? 'male' : 'female'"
+                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[3]), i, 3)"
+                @drop="onDrop($event, i, 3)" @dragover.prevent @dragenter.prevent>
                 <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
                 <div class="grouping-name">
                   {{ grouping[3].name }}

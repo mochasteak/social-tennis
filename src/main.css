@@ -137,7 +137,6 @@ h4 {
 	background-color: #FFF;
 	border-radius: 0.5rem;
 	box-shadow: var(--shadow);
-	margin-bottom: 1.5rem;
 }
 
 .create-player .options {
@@ -339,4 +338,14 @@ input:checked ~ .bubble::after {
 .grouping-name {
 	flex-grow: 1;
 	justify-content: center;
+}
+
+.form-inputs {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	margin-bottom: 1.5rem;
+	gap: 1rem;
+	justify-content: space-between;
 }
