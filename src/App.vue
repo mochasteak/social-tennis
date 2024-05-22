@@ -28,6 +28,15 @@ watch(players, (newVal) => {
   deep: true
 })
 
+watch(groupings, (newVal) => {
+  console.log(`watch >> newVal = ${JSON.stringify(newVal)}`)
+  // Scroll to the top of the 'groupings' list
+  console.log(`watch >> anchor = ${anchor.value}`);
+  //const lastGrouping = anchor.value.lastElementChild
+  //console.log(`lastGrouping = ${lastGrouping}`);
+  //lastGrouping?.scrollIntoView({behavior: "smooth", block: "start"})
+}, {deep: true})
+
 const addPlayer = () => {
 
   console.log('addPlayer invoked');
@@ -72,17 +81,17 @@ const startDrag = (evt, player, groupIndex, playerIndex) => {
 const onDrop = (evt, groupIndex, playerIndex) => {
   console.log('onDrop >> groupIndex = ' + groupIndex)
 
-  // Get the player data and add to new grouing
+  // Get the player data
   const movedPlayer = evt.dataTransfer.getData('player')
   console.log('movedPlayer = ' + JSON.stringify(movedPlayer));
 
   // Store the outbound player details
   outboundPlayer.value = groupings.value[groupIndex][playerIndex]
 
-  // Add the new player to group, replacing the existing player
+  // Replace the outbound player with the inbound player
   groupings.value[groupIndex].splice(playerIndex, 1, JSON.parse(movedPlayer))
 
-  // Remove the moved player from their original list and add the swapped player
+  // Remove the inbound player from their original list and add the outbound player
   groupings.value[inboundGroupIndex.value].splice(inboundPlayerIndex.value, 1, outboundPlayer.value)
 
   //Reset the variables
@@ -130,9 +139,6 @@ const makeGroupings = () => {
     groupings.value.push(tempPlayers.slice(i, i + 4));
   }
 
-  // Scroll to the top of the 'groupings' list
-  anchor.value.scrollIntoView({ behavior: 'smooth' })
-
   // Notify user
   toast.success(`Groupings for Round ${round.value} created. (scroll down)`)
 
@@ -141,6 +147,7 @@ const makeGroupings = () => {
 onMounted(() => {
   players.value = JSON.parse(localStorage.getItem('players')) || []
 })
+
 </script>
 
 <template>
@@ -153,7 +160,7 @@ onMounted(() => {
     </section>
 
     <section class="create-player">
-      <h2 class="title">Add Player</h2>
+      <h2 class="title">1. Add Players</h2>
 
       <form id="new-player-form" @submit.prevent="addPlayer">
         
@@ -209,20 +216,20 @@ onMounted(() => {
 
     <section class="greeting">
       <div>
-        <h2 class="title">Make groupings</h2>
+        <h2 class="title">2. Make groupings</h2>
       </div>
     </section>
     <section>
       <button class="make-groupings-button" @click="makeGroupings">Make groupings</button>
     </section>
 
-    <section class="greeting" ref="anchor">
+    <section class="greeting">
       <h2 class="title" v-if="groupings.length > 0">Groupings</h2>
       <p class="instructions" v-if="groupings.length > 0">Touch and hold a name to drag it to another location to swap
         players</p>
 
 
-      <div v-for="(grouping, i) in groupings" :key="i">
+      <div v-for="(grouping, i) in groupings" :key="i" ref="anchor">
 
         <div v-if="grouping[0].round">
           <h3 class="subtitle">Round {{ grouping[0].round }}</h3>
@@ -287,7 +294,6 @@ onMounted(() => {
       <button v-if="groupings.length > 0" class="delete-groupings-button" @click="deleteGroupings">Delete
         groupings</button>
     </section>
-    <div ref="anchor"></div>
 
   </main>
 </template>
