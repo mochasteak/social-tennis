@@ -22,20 +22,14 @@ const players_asc = computed(() => players.value.sort((a, b) => {
 }))
 
 
+// When new players are added, store them in localStorage
 watch(players, (newVal) => {
   localStorage.setItem('players', JSON.stringify(newVal))
 }, {
   deep: true
 })
 
-watch(groupings, (newVal) => {
-  console.log(`watch >> newVal = ${JSON.stringify(newVal)}`)
-  // Scroll to the top of the 'groupings' list
-  console.log(`watch >> anchor = ${anchor.value}`);
-  //const lastGrouping = anchor.value.lastElementChild
-  //console.log(`lastGrouping = ${lastGrouping}`);
-  //lastGrouping?.scrollIntoView({behavior: "smooth", block: "start"})
-}, {deep: true})
+
 
 const addPlayer = () => {
 
@@ -163,7 +157,7 @@ onMounted(() => {
       <h2 class="title">1. Add Players</h2>
 
       <form id="new-player-form" @submit.prevent="addPlayer">
-        
+
 
         <div class="form-inputs">
           <div>
@@ -171,16 +165,8 @@ onMounted(() => {
 
           </div>
           <div>
-            <VueToggles 
-              v-model="isMale" 
-              :height="50" 
-              :width="120" 
-              checkedText="Male" 
-              uncheckedText="Female"
-              checkedBg="#3A82EE" 
-              uncheckedBg="#EA40A4" 
-              fontSize="16"
-            />
+            <VueToggles v-model="isMale" :height="50" :width="120" checkedText="Male" uncheckedText="Female"
+              checkedBg="#3A82EE" uncheckedBg="#EA40A4" fontSize="16" />
           </div>
 
         </div>
@@ -228,68 +214,69 @@ onMounted(() => {
       <p class="instructions" v-if="groupings.length > 0">Touch and hold a name to drag it to another location to swap
         players</p>
 
+      <div ref="anchor" id="anchor">
+        <div v-for="(grouping, i) in groupings" :key="i">
 
-      <div v-for="(grouping, i) in groupings" :key="i" ref="anchor">
+          <div v-if="grouping[0].round">
+            <h3 class="subtitle">Round {{ grouping[0].round }}</h3>
+          </div>
 
-        <div v-if="grouping[0].round">
-          <h3 class="subtitle">Round {{ grouping[0].round }}</h3>
-        </div>
+          <div v-else>
 
-        <div v-else>
+            <div class="grouping">
 
-          <div class="grouping">
+              <div class="player-pair">
+                <div v-if="grouping[0]" class="player" :class="grouping[0].gender == 'male' ? 'male' : 'female'"
+                  draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[0]), i, 0)"
+                  @drop="onDrop($event, i, 0)" @dragover.prevent @dragenter.prevent>
+                  <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                  <div class="grouping-name">
+                    {{ grouping[0].name }}
+                  </div>
 
-            <div class="player-pair">
-              <div v-if="grouping[0]" class="player" :class="grouping[0].gender == 'male' ? 'male' : 'female'"
-                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[0]), i, 0)"
-                @drop="onDrop($event, i, 0)" @dragover.prevent @dragenter.prevent>
-                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
-                <div class="grouping-name">
-                  {{ grouping[0].name }}
+                </div>
+
+                <div v-if="grouping[1]" class="player" :class="grouping[1].gender == 'male' ? 'male' : 'female'"
+                  draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[1]), i, 1)"
+                  @drop="onDrop($event, i, 1)" @dragover.prevent @dragenter.prevent>
+                  <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                  <div class="grouping-name">
+                    {{ grouping[1].name }}
+                  </div>
+
                 </div>
 
               </div>
 
-              <div v-if="grouping[1]" class="player" :class="grouping[1].gender == 'male' ? 'male' : 'female'"
-                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[1]), i, 1)"
-                @drop="onDrop($event, i, 1)" @dragover.prevent @dragenter.prevent>
-                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
-                <div class="grouping-name">
-                  {{ grouping[1].name }}
+              <div v-if="grouping.length == 4" class="vs">VS</div>
+
+              <div class="player-pair">
+                <div v-if="grouping[2]" class="player" :class="grouping[2].gender == 'male' ? 'male' : 'female'"
+                  draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[2]), i, 2)"
+                  @drop="onDrop($event, i, 2)" @dragover.prevent @dragenter.prevent>
+                  <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                  <div class="grouping-name">
+                    {{ grouping[2].name }}
+                  </div>
+
+                </div>
+
+                <div v-if="grouping[3]" class="player" :class="grouping[3].gender == 'male' ? 'male' : 'female'"
+                  draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[3]), i, 3)"
+                  @drop="onDrop($event, i, 3)" @dragover.prevent @dragenter.prevent>
+                  <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
+                  <div class="grouping-name">
+                    {{ grouping[3].name }}
+                  </div>
                 </div>
 
               </div>
-
-            </div>
-
-            <div v-if="grouping.length == 4" class="vs">VS</div>
-
-            <div class="player-pair">
-              <div v-if="grouping[2]" class="player" :class="grouping[2].gender == 'male' ? 'male' : 'female'"
-                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[2]), i, 2)"
-                @drop="onDrop($event, i, 2)" @dragover.prevent @dragenter.prevent>
-                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
-                <div class="grouping-name">
-                  {{ grouping[2].name }}
-                </div>
-
-              </div>
-
-              <div v-if="grouping[3]" class="player" :class="grouping[3].gender == 'male' ? 'male' : 'female'"
-                draggable="true" @dragstart="startDrag($event, JSON.stringify(grouping[3]), i, 3)"
-                @drop="onDrop($event, i, 3)" @dragover.prevent @dragenter.prevent>
-                <div class="icon"><i class="fi fi-rr-menu-dots-vertical"></i></div>
-                <div class="grouping-name">
-                  {{ grouping[3].name }}
-                </div>
-              </div>
-
             </div>
           </div>
+
         </div>
-
-
       </div>
+
 
       <button v-if="groupings.length > 0" class="delete-groupings-button" @click="deleteGroupings">Delete
         groupings</button>
