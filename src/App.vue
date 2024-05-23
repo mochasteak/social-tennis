@@ -136,6 +136,12 @@ const makeGroupings = () => {
   // Notify user
   toast.success(`Groupings for Round ${round.value} created. (scroll down)`)
 
+  // Scroll to bottom
+  if(anchor.value){
+    anchor.value.scrollIntoView({behavior: 'smooth', block: "end"})
+  }
+  
+
 }
 
 onMounted(() => {
@@ -214,7 +220,7 @@ onMounted(() => {
       <p class="instructions" v-if="groupings.length > 0">Touch and hold a name to drag it to another location to swap
         players</p>
 
-      <div ref="anchor" id="anchor">
+      <div>
         <div v-for="(grouping, i) in groupings" :key="i">
 
           <div v-if="grouping[0].round">
@@ -278,8 +284,15 @@ onMounted(() => {
       </div>
 
 
-      <button v-if="groupings.length > 0" class="delete-groupings-button" @click="deleteGroupings">Delete
-        groupings</button>
+      <button 
+        v-show="groupings.length > 0" 
+        class="delete-groupings-button" 
+        @click="deleteGroupings"
+        ref="anchor" 
+        id="anchor"
+      >
+        Delete groupings
+      </button>
     </section>
 
   </main>
